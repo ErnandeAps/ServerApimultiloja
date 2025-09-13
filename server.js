@@ -42,12 +42,20 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-app.delete('/', (req, res) => {
+app.delete("/", (req, res) => {
   const { cnpj, nomeImagem } = req.body;
 
   if (!cnpj || !nomeImagem) {
-    return res.status(400).json({ erro: 'CNPJ e nome da imagem são obrigatórios.' });
+    return res.status(400).json({
+      erro: "CNPJ e nome da imagem são obrigatórios.",
+    });
   }
+
+  // Aqui você poderia implementar a exclusão da imagem se quiser
+  return res.json({ status: "imagem excluída (não implementado)" });
+});
+
+// 📸 Upload de imagem
 app.post("/", upload.single("imagem"), (req, res) => {
   const cnpj = req.body.cnpj;
   const nomeArquivo = req.file.originalname;
