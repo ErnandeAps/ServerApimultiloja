@@ -7,7 +7,6 @@ const multer = require("multer");
 const mercadopago = require("mercadopago");
 const { dbPromise } = require("./db");
 
-// Rotas do projeto
 const clientesRoutes = require("./routes/clientes");
 const vendasRoutes = require("./routes/vendas");
 const produtosRoutes = require("./routes/produtos");
@@ -23,20 +22,18 @@ const port = 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
-// Servir imagens
 app.use("/imagens", express.static(path.join(__dirname, "imagens")));
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const cnpj = req.body.cnpj;
     const dir = path.join("imagens", cnpj, "produtos");
 
-    // Cria o diretório se não existir
     fs.mkdirSync(dir, { recursive: true });
 
     cb(null, dir);
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname); // mantém o nome original do arquivo
+    cb(null, file.originalname);
   },
 });
 
@@ -51,11 +48,9 @@ app.delete("/", (req, res) => {
     });
   }
 
-  // Aqui você poderia implementar a exclusão da imagem se quiser
   return res.json({ status: "imagem excluída (não implementado)" });
 });
 
-// 📸 Upload de imagem
 app.post("/", upload.single("imagem"), (req, res) => {
   const cnpj = req.body.cnpj;
   const nomeArquivo = req.file.originalname;
@@ -69,31 +64,7 @@ app.post("/", upload.single("imagem"), (req, res) => {
     caminho,
   });
 });
-/*
-// 📸 Upload de imagem (com Multer)
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const cnpj = req.params.cnpj;
-    const pasta = path.join(__dirname, "imagens", cnpj, "produtos");
 
-    fs.mkdirSync(pasta, { recursive: true }); // Cria diretório se não existir
-    cb(null, pasta);
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname); // Usa o nome original do arquivo
-  },
-});
-
-const upload = multer({ storage: storage });
-
-app.post("/imagens/:cnpj/produtos", upload.single("imagem"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send("Nenhuma imagem enviada.");
-  }
-  res.status(200).send("Imagem enviada com sucesso.");
-});
-*/
-// Rotas do app
 app.use("/clientes", clientesRoutes);
 app.use("/vendas", vendasRoutes);
 app.use("/produtos", produtosRoutes);
@@ -103,7 +74,6 @@ app.use("/lojas", lojasRoutes);
 app.use("/checkout", checkoutRoutes);
 app.use("/pix", pixRoutes);
 
-// ✅ Webhook do Mercado Pago (notificações automáticas)
 app.post("/webhooks", async (req, res) => {
   if (req.body?.data?.id) {
     const paymentId = req.body.data.id;
@@ -129,7 +99,6 @@ app.post("/webhooks", async (req, res) => {
   res.sendStatus(200);
 });
 
-// ✅ Rotas de retorno visual para testes via navegador
 app.get("/pagamento/sucesso", (req, res) => {
   res.send("✅ Pagamento aprovado com sucesso!");
 });
@@ -142,7 +111,6 @@ app.get("/pagamento/pendente", (req, res) => {
   res.send("⏳ Seu pagamento está pendente de aprovação.");
 });
 
-// Iniciar servidor
 app.listen(port, () => {
   console.log(`🚀 Servidor rodando na porta ${port}`);
 });
